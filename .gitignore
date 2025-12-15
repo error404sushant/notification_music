@@ -1,0 +1,22 @@
+# Ignore files
+.DS_Store
+.dart_tool/
+.packages
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Example app specific
+example/.dart_tool/
+example/.packages
+example/build/
+example/.flutter-plugins
+example/.flutter-plugins-dependencies
+example/android/app/google-services.json
+example/lib/firebase_options.dart
