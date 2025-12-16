@@ -8,6 +8,7 @@ A Flutter package for Android that plays **looping background audio** when a **F
 
 - ✅ **Android-only** support (API 26+)
 - ✅ **Looping audio** playback via Android Foreground Service
+- ✅ **Configurable loop behavior** - play once or loop continuously
 - ✅ Works in **foreground**, **background**, and **terminated** states
 - ✅ Audio stops when user **taps notification** or **opens app**
 - ✅ **Data-only FCM messages** (no notification payload needed)
@@ -121,7 +122,8 @@ Send a **data-only** message (no `notification` object) with high priority:
     "data": {
       "music_url": "https://example.com/audio.mp3",
       "title": "Critical Alert",
-      "body": "Tap to stop audio"
+      "body": "Tap to stop audio",
+      "should_loop": "true"
     },
     "android": {
       "priority": "high"
@@ -134,6 +136,7 @@ Send a **data-only** message (no `notification` object) with high priority:
 - Use **data-only** messages (no `notification` payload)
 - Set `android.priority` to `"high"` for background delivery
 - `music_url` must be a publicly accessible URL
+- `should_loop` controls playback: `"true"` for continuous loop (default), `"false"` for single playback
 
 ### Stop Audio
 
@@ -166,6 +169,10 @@ await GenericAudioNotification().stopAudio();
 - `music_url` (String): URL to audio file
 - `title` (String): Notification title
 - `body` (String): Notification body
+
+### Optional Fields
+
+- `should_loop` (String): `"true"` to loop continuously (default), `"false"` to play once
 
 ### Example cURL Request
 

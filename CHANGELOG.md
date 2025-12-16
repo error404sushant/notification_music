@@ -16,14 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example app with FCM token display and testing UI
 - Support for custom notification title, body, and icon
 - Full documentation with setup and usage instructions
+- **Loop control parameter**: `should_loop` to control whether audio loops or plays once
 
 ### Features
 - Works in foreground, background, and terminated app states
 - Data-only FCM message support
 - High-priority message handling for reliable delivery
-- MediaPlayer-based audio looping
+- MediaPlayer-based audio looping with configurable loop behavior
 - Notification channel management
 - Lifecycle-aware audio control
+- Auto-stop when `should_loop=false` and audio completes
 
 ### Supported Platforms
 - Android (API 26+)
