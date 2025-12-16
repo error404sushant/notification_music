@@ -27,6 +27,7 @@ class GenericAudioNotificationPlugin: FlutterPlugin, MethodCallHandler {
       val title = call.argument<String>("title")
       val body = call.argument<String>("body")
       val icon = call.argument<String>("icon")
+      val loop = call.argument<Boolean>("loop") ?: true
 
       val intent = android.content.Intent(context, AudioService::class.java)
       intent.action = AudioService.ACTION_START
@@ -34,6 +35,7 @@ class GenericAudioNotificationPlugin: FlutterPlugin, MethodCallHandler {
       intent.putExtra(AudioService.EXTRA_TITLE, title)
       intent.putExtra(AudioService.EXTRA_BODY, body)
       intent.putExtra(AudioService.EXTRA_ICON, icon)
+      intent.putExtra(AudioService.EXTRA_LOOP, loop)
 
       if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
         context.startForegroundService(intent)

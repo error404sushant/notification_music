@@ -8,7 +8,8 @@ abstract class GenericAudioNotificationPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static GenericAudioNotificationPlatform _instance = MethodChannelGenericAudioNotification();
+  static GenericAudioNotificationPlatform _instance =
+      MethodChannelGenericAudioNotification();
 
   /// The default instance of [GenericAudioNotificationPlatform] to use.
   ///
@@ -27,7 +28,13 @@ abstract class GenericAudioNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<void> startAudio(String url, {String title = 'Alert', String body = 'Playing audio...', String? icon}) {
+  Future<void> startAudio(
+    String url, {
+    String? title,
+    String? body,
+    String? icon,
+    bool loop = true,
+  }) {
     throw UnimplementedError('startAudio() has not been implemented.');
   }
 

@@ -33,9 +33,25 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final title = message.data['title'] ?? 'Critical Alert';
     final body = message.data['body'] ?? 'Action Required';
 
+    // Parse should_loop: defaults to true if not present
+    bool loop = true;
+    if (message.data.containsKey('should_loop')) {
+      final shouldLoopValue = message.data['should_loop'];
+      print(
+          '🔍 RAW should_loop value: "$shouldLoopValue" (type: ${shouldLoopValue.runtimeType})');
+      if (shouldLoopValue is bool) {
+        loop = shouldLoopValue;
+      } else if (shouldLoopValue is String) {
+        loop = shouldLoopValue.toLowerCase() == 'true';
+      }
+    } else {
+      print('⚠️  should_loop key not found in data, defaulting to true');
+    }
+
     print('🎵 Music URL found: $musicUrl');
     print('📝 Title: $title');
     print('📝 Body: $body');
+    print('🔁 Loop (FINAL): $loop');
 
     if (musicUrl != null && musicUrl.isNotEmpty) {
       print('▶️  Starting audio playback from background handler...');
@@ -46,6 +62,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         title: title,
         body: body,
         icon: 'mipmap/ic_launcher',
+        loop: loop,
       );
 
       print('✅ Audio service started successfully');
@@ -134,9 +151,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             message.notification?.body ??
             'Action Required';
 
+        // Parse should_loop: defaults to true if not present
+        bool loop = true;
+        if (message.data.containsKey('should_loop')) {
+          final shouldLoopValue = message.data['should_loop'];
+          print(
+              '🔍 RAW should_loop value: "$shouldLoopValue" (type: ${shouldLoopValue.runtimeType})');
+          if (shouldLoopValue is bool) {
+            loop = shouldLoopValue;
+          } else if (shouldLoopValue is String) {
+            loop = shouldLoopValue.toLowerCase() == 'true';
+          }
+        } else {
+          print('⚠️  should_loop key not found in data, defaulting to true');
+        }
+
         print('🎵 Music URL: $musicUrl');
         print('📝 Title: $title');
         print('📝 Body: $body');
+        print('🔁 Loop (FINAL): $loop');
 
         if (musicUrl != null && musicUrl.isNotEmpty) {
           print('▶️  Starting audio from foreground handler...');
@@ -145,6 +178,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             title: title,
             body: body,
             icon: 'mipmap/ic_launcher',
+            loop: loop,
           );
           print('✅ Audio service started');
         } else {

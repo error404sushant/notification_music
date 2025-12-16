@@ -24,6 +24,7 @@ class AudioService : Service() {
         const val EXTRA_TITLE = "EXTRA_TITLE"
         const val EXTRA_BODY = "EXTRA_BODY"
         const val EXTRA_ICON = "EXTRA_ICON" // Resource name
+        const val EXTRA_LOOP = "EXTRA_LOOP" // Loop audio or play once
         const val CHANNEL_ID = "generic_audio_alert_channel"
         const val NOTIFICATION_ID = 888
     }
@@ -41,10 +42,11 @@ class AudioService : Service() {
                 val title = intent.getStringExtra(EXTRA_TITLE) ?: "Alert"
                 val body = intent.getStringExtra(EXTRA_BODY) ?: "Playing audio..."
                 val icon = intent.getStringExtra(EXTRA_ICON)
+                val loop = intent.getBooleanExtra(EXTRA_LOOP, true)
                 
                 startForegroundService(title, body, icon)
                 if (url != null) {
-                    playAudio(url)
+                    playAudio(url, loop)
                 }
             }
             ACTION_STOP -> {
@@ -107,32 +109,39 @@ class AudioService : Service() {
         }
     }
 
-    private fun playAudio(url: String) {
-        if (isServicePlaying) return // Already playing
+    private fun playAudio(url: String, loop: Boolean = true) {
+        if (isServicePlaying) return
 
         try {
             mediaPlayer = MediaPlayer().apply {
                 setAudioAttributes(
                     AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA) // Or USAGE_ALARM
+                        .setUsage(AudioAttributes.USAGE_ALARM)
                         .build()
                 )
                 setDataSource(url)
-                isLooping = true
-                prepareAsync()
+                isLooping = loop // Set looping based on parameter
                 setOnPreparedListener { 
                     it.start() 
                     isServicePlaying = true
                 }
-                setOnErrorListener { _, _, _ ->
-                    stopAudio()
+                setOnErrorListener { mp, what, extra ->
+                    android.util.Log.e("AudioService", "MediaPlayer error: what=$what, extra=$extra")
+                    stopSelf()
                     true
                 }
+                setOnCompletionListener {
+                    // If not looping, stop the service when audio completes
+                    if (!loop) {
+                        stopSelf()
+                    }
+                }
+                prepareAsync()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            stopAudio()
+            android.util.Log.e("AudioService", "Error playing audio", e)
+            stopSelf()
         }
     }
 

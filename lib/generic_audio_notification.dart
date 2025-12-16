@@ -1,4 +1,3 @@
-
 import 'generic_audio_notification_platform_interface.dart';
 
 class GenericAudioNotification {
@@ -6,8 +5,20 @@ class GenericAudioNotification {
     return GenericAudioNotificationPlatform.instance.getPlatformVersion();
   }
 
-  Future<void> startAudio(String url, {String title = 'Alert', String body = 'Playing audio...', String? icon}) {
-    return GenericAudioNotificationPlatform.instance.startAudio(url, title: title, body: body, icon: icon);
+  Future<void> startAudio(
+    String url, {
+    String? title,
+    String? body,
+    String? icon,
+    bool loop = true,
+  }) {
+    return GenericAudioNotificationPlatform.instance.startAudio(
+      url,
+      title: title,
+      body: body,
+      icon: icon,
+      loop: loop,
+    );
   }
 
   Future<void> stopAudio() {
