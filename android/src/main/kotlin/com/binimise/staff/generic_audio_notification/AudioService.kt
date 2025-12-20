@@ -17,6 +17,9 @@ class AudioService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var isServicePlaying = false
     private var notificationTimestamp: Long = 0
+    private var notificationTitle: String = ""
+    private var notificationBody: String = ""
+    private var notificationUrl: String = ""
 
     companion object {
         const val ACTION_START = "START_AUDIO"
@@ -28,6 +31,9 @@ class AudioService : Service() {
         const val EXTRA_ICON = "EXTRA_ICON" // Resource name
         const val EXTRA_LOOP = "EXTRA_LOOP" // Loop audio or play once
         const val EXTRA_TIMESTAMP = "EXTRA_TIMESTAMP" // Notification timestamp
+        const val EXTRA_NOTIFICATION_TITLE = "EXTRA_NOTIFICATION_TITLE"
+        const val EXTRA_NOTIFICATION_BODY = "EXTRA_NOTIFICATION_BODY"
+        const val EXTRA_NOTIFICATION_URL = "EXTRA_NOTIFICATION_URL"
         const val CHANNEL_ID = "generic_audio_alert_channel"
         const val NOTIFICATION_ID = 888
         const val BROADCAST_NOTIFICATION_TAPPED = "com.binimise.staff.generic_audio_notification.NOTIFICATION_TAPPED"
@@ -48,8 +54,11 @@ class AudioService : Service() {
                 val icon = intent.getStringExtra(EXTRA_ICON)
                 val loop = intent.getBooleanExtra(EXTRA_LOOP, true)
                 
-                // Store the timestamp when notification is created
+                // Store notification data
                 notificationTimestamp = System.currentTimeMillis()
+                notificationTitle = title
+                notificationBody = body
+                notificationUrl = url ?: ""
                 
                 startForegroundService(title, body, icon)
                 if (url != null) {
@@ -62,9 +71,12 @@ class AudioService : Service() {
                 stopSelf()
             }
             ACTION_NOTIFICATION_TAPPED -> {
-                // Broadcast the tap event with timestamp to Flutter
+                // Broadcast the tap event with all notification data to Flutter
                 val broadcastIntent = Intent(BROADCAST_NOTIFICATION_TAPPED)
                 broadcastIntent.putExtra(EXTRA_TIMESTAMP, notificationTimestamp)
+                broadcastIntent.putExtra(EXTRA_NOTIFICATION_TITLE, notificationTitle)
+                broadcastIntent.putExtra(EXTRA_NOTIFICATION_BODY, notificationBody)
+                broadcastIntent.putExtra(EXTRA_NOTIFICATION_URL, notificationUrl)
                 sendBroadcast(broadcastIntent)
                 
                 // Stop audio and service

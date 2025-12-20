@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'generic_audio_notification_platform_interface.dart';
+import 'notification_response.dart';
 
 /// An implementation of [GenericAudioNotificationPlatform] that uses method channels.
 class MethodChannelGenericAudioNotification
@@ -10,7 +11,7 @@ class MethodChannelGenericAudioNotification
   @visibleForTesting
   final methodChannel = const MethodChannel('generic_audio_notification');
 
-  Function(DateTime timestamp)? _onNotificationTapped;
+  Function(AudioNotificationResponse response)? _onNotificationTapped;
 
   MethodChannelGenericAudioNotification() {
     methodChannel.setMethodCallHandler(_handleMethodCall);
@@ -18,9 +19,20 @@ class MethodChannelGenericAudioNotification
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     if (call.method == 'onNotificationTapped') {
-      final timestamp = call.arguments['timestamp'] as int;
-      final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      _onNotificationTapped?.call(dateTime);
+      final args = call.arguments as Map;
+      final timestamp = args['timestamp'] as int;
+      final title = args['title'] as String? ?? '';
+      final body = args['body'] as String? ?? '';
+      final url = args['url'] as String? ?? '';
+
+      final response = AudioNotificationResponse(
+        title: title,
+        body: body,
+        url: url,
+        timestamp: DateTime.fromMillisecondsSinceEpoch(timestamp),
+      );
+
+      _onNotificationTapped?.call(response);
     }
   }
 
@@ -61,7 +73,8 @@ class MethodChannelGenericAudioNotification
   }
 
   @override
-  void setOnNotificationTapped(Function(DateTime timestamp) callback) {
+  void setOnNotificationTapped(
+      Function(AudioNotificationResponse response) callback) {
     _onNotificationTapped = callback;
   }
 }

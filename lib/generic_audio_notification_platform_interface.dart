@@ -1,6 +1,7 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'generic_audio_notification_method_channel.dart';
+import 'notification_response.dart';
 
 abstract class GenericAudioNotificationPlatform extends PlatformInterface {
   /// Constructs a GenericAudioNotificationPlatform.
@@ -46,7 +47,8 @@ abstract class GenericAudioNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('getPackageName() has not been implemented.');
   }
 
-  void setOnNotificationTapped(Function(DateTime timestamp) callback) {
+  void setOnNotificationTapped(
+      Function(AudioNotificationResponse response) callback) {
     throw UnimplementedError(
         'setOnNotificationTapped() has not been implemented.');
   }

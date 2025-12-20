@@ -103,7 +103,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       FlutterLocalNotificationsPlugin();
   String? _fcmToken;
   String _statusMessage = 'Fetching FCM Token...';
-  DateTime? _lastNotificationTapTime;
+  AudioNotificationResponse? _lastNotificationTap;
 
   @override
   void initState() {
@@ -257,12 +257,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // NOTIFICATION TAP CALLBACK
   // ==========================================================================
   // This callback is invoked when the user taps the notification.
-  // The audio will automatically stop and we receive the notification timestamp.
+  // The audio will automatically stop and we receive the complete notification data.
   // ==========================================================================
   void _setupNotificationTapCallback() {
-    _genericAudioNotificationPlugin.setOnNotificationTapped((timestamp) {
+    _genericAudioNotificationPlugin.setOnNotificationTapped((response) {
       setState(() {
-        _lastNotificationTapTime = timestamp;
+        _lastNotificationTap = response;
       });
       print(
           '\n╔════════════════════════════════════════════════════════════════╗');
@@ -270,7 +270,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           '║              NOTIFICATION TAPPED CALLBACK                      ║');
       print(
           '╚════════════════════════════════════════════════════════════════╝');
-      print('📅 Notification created at: $timestamp');
+      print('📋 Title: ${response.title}');
+      print('📝 Body: ${response.body}');
+      print('🎵 URL: ${response.url}');
+      print('📅 Created at: ${response.timestamp}');
       print('🛑 Audio stopped automatically');
       print(
           '═══════════════════════════════════════════════════════════════════\n');
@@ -386,7 +389,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     padding: const EdgeInsets.all(16.0),
                     child: Text(_statusMessage, textAlign: TextAlign.center),
                   ),
-                if (_lastNotificationTapTime != null)
+                if (_lastNotificationTap != null)
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Card(
@@ -394,22 +397,32 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.touch_app,
-                                size: 32, color: Colors.green),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Notification Tapped!',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.touch_app,
+                                    size: 32, color: Colors.green),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Notification Tapped!',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Created at:\n${_lastNotificationTapTime!.toLocal()}',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 12),
+                            const SizedBox(height: 12),
+                            _buildInfoRow('Title', _lastNotificationTap!.title),
+                            _buildInfoRow('Body', _lastNotificationTap!.body),
+                            _buildInfoRow('URL', _lastNotificationTap!.url),
+                            _buildInfoRow(
+                              'Created',
+                              _lastNotificationTap!.timestamp
+                                  .toLocal()
+                                  .toString(),
                             ),
                           ],
                         ),
@@ -442,7 +455,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      _lastNotificationTapTime = null;
+                      _lastNotificationTap = null;
                     });
                   },
                   child: const Text('Clear Tap Info'),
@@ -451,6 +464,33 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 70,
+            child: Text(
+              '$label:',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
       ),
     );
   }

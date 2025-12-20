@@ -107,12 +107,14 @@ void main() async {
 
 ### Register Notification Tap Callback
 
-Get notified when user taps the notification and receive the timestamp:
+Get notified when user taps the notification and receive the full notification details:
 
 ```dart
-GenericAudioNotification().setOnNotificationTapped((timestamp) {
-  print('Notification was created at: $timestamp');
-  // Use timestamp for analytics, logging, or business logic
+GenericAudioNotification().setOnNotificationTapped((response) {
+  print('Title: ${response.title}');
+  print('Body: ${response.body}');
+  print('URL: ${response.url}');
+  print('Created at: ${response.timestamp}');
   // Audio is automatically stopped when notification is tapped
 });
 ```

@@ -1,4 +1,8 @@
 import 'generic_audio_notification_platform_interface.dart';
+import 'notification_response.dart';
+
+// Export AudioNotificationResponse for users of the package
+export 'notification_response.dart';
 
 class GenericAudioNotification {
   static bool _isInitialized = false;
@@ -45,17 +49,21 @@ class GenericAudioNotification {
 
   /// Set a callback to be invoked when the notification is tapped
   ///
-  /// The callback receives a [DateTime] representing when the notification was created.
+  /// The callback receives a [AudioNotificationResponse] containing all notification data.
   /// When the notification is tapped, the audio will automatically stop and the callback
-  /// will be invoked with the notification timestamp.
+  /// will be invoked with the notification details.
   ///
   /// Example:
   /// ```dart
-  /// GenericAudioNotification().setOnNotificationTapped((timestamp) {
-  ///   print('Notification tapped! Created at: $timestamp');
+  /// GenericAudioNotification().setOnNotificationTapped((response) {
+  ///   print('Title: ${response.title}');
+  ///   print('Body: ${response.body}');
+  ///   print('URL: ${response.url}');
+  ///   print('Created at: ${response.timestamp}');
   /// });
   /// ```
-  void setOnNotificationTapped(Function(DateTime timestamp) callback) {
+  void setOnNotificationTapped(
+      Function(AudioNotificationResponse response) callback) {
     GenericAudioNotificationPlatform.instance.setOnNotificationTapped(callback);
   }
 }

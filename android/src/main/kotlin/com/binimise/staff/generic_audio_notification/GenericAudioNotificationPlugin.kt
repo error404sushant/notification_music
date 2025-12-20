@@ -32,8 +32,17 @@ class GenericAudioNotificationPlugin: FlutterPlugin, MethodCallHandler {
       override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == AudioService.BROADCAST_NOTIFICATION_TAPPED) {
           val timestamp = intent.getLongExtra(AudioService.EXTRA_TIMESTAMP, 0L)
-          // Send timestamp to Flutter
-          channel.invokeMethod("onNotificationTapped", mapOf("timestamp" to timestamp))
+          val title = intent.getStringExtra(AudioService.EXTRA_NOTIFICATION_TITLE) ?: ""
+          val body = intent.getStringExtra(AudioService.EXTRA_NOTIFICATION_BODY) ?: ""
+          val url = intent.getStringExtra(AudioService.EXTRA_NOTIFICATION_URL) ?: ""
+          
+          // Send all notification data to Flutter
+          channel.invokeMethod("onNotificationTapped", mapOf(
+            "timestamp" to timestamp,
+            "title" to title,
+            "body" to body,
+            "url" to url
+          ))
         }
       }
     }

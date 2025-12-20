@@ -22,7 +22,7 @@ class MockGenericAudioNotificationPlatform
   Future<String?> getPackageName() => Future.value('com.test.package');
 
   @override
-  void setOnNotificationTapped(Function(DateTime timestamp) callback) {
+  void setOnNotificationTapped(Function(AudioNotificationResponse response) callback) {
     // Mock implementation - does nothing in tests
   }
 }
