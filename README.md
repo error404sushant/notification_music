@@ -9,6 +9,7 @@ A Flutter package for Android that plays **looping background audio** when a **F
 - ✅ **Android-only** support (API 26+)
 - ✅ **Looping audio** playback via Android Foreground Service
 - ✅ **Configurable loop behavior** - play once or loop continuously
+- ✅ **Notification tap callback** - get timestamp when notification is tapped
 - ✅ Works in **foreground**, **background**, and **terminated** states
 - ✅ Audio stops when user **taps notification** or **opens app**
 - ✅ **Data-only FCM messages** (no notification payload needed)
@@ -103,6 +104,18 @@ void main() async {
 ```
 
 ## 📱 Usage
+
+### Register Notification Tap Callback
+
+Get notified when user taps the notification and receive the timestamp:
+
+```dart
+GenericAudioNotification().setOnNotificationTapped((timestamp) {
+  print('Notification was created at: $timestamp');
+  // Use timestamp for analytics, logging, or business logic
+  // Audio is automatically stopped when notification is tapped
+});
+```
 
 ### Get FCM Token
 
@@ -209,6 +222,10 @@ curl -X POST https://fcm.googleapis.com/v1/projects/YOUR_PROJECT/messages:send \
 1. **Check** notification permissions are granted
 2. **Verify** Foreground Service is running (check logs)
 3. **Test** with `Simulate Alert` button in example app
+
+### License Issues
+
+**This package no longer requires a license.** All license-related code has been removed.
 
 ## 📚 Example App
 

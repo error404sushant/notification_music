@@ -7,16 +7,39 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 
 /** GenericAudioNotificationPlugin */
 class GenericAudioNotificationPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var context: android.content.Context
+  private var notificationTapReceiver: BroadcastReceiver? = null
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     context = flutterPluginBinding.applicationContext
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "generic_audio_notification")
     channel.setMethodCallHandler(this)
+    
+    // Register broadcast receiver for notification taps
+    setupNotificationTapReceiver()
+  }
+
+  private fun setupNotificationTapReceiver() {
+    notificationTapReceiver = object : BroadcastReceiver() {
+      override fun onReceive(context: Context?, intent: Intent?) {
+        if (intent?.action == AudioService.BROADCAST_NOTIFICATION_TAPPED) {
+          val timestamp = intent.getLongExtra(AudioService.EXTRA_TIMESTAMP, 0L)
+          // Send timestamp to Flutter
+          channel.invokeMethod("onNotificationTapped", mapOf("timestamp" to timestamp))
+        }
+      }
+    }
+    
+    val filter = IntentFilter(AudioService.BROADCAST_NOTIFICATION_TAPPED)
+    context.registerReceiver(notificationTapReceiver, filter)
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
@@ -48,6 +71,8 @@ class GenericAudioNotificationPlugin: FlutterPlugin, MethodCallHandler {
       intent.action = AudioService.ACTION_STOP
       context.startService(intent)
       result.success(null)
+    } else if (call.method == "getPackageName") {
+      result.success(context.packageName)
     } else {
       result.notImplemented()
     }
@@ -55,5 +80,10 @@ class GenericAudioNotificationPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+    // Unregister broadcast receiver
+    if (notificationTapReceiver != null) {
+      context.unregisterReceiver(notificationTapReceiver)
+      notificationTapReceiver = null
+    }
   }
 }

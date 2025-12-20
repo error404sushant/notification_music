@@ -41,4 +41,13 @@ abstract class GenericAudioNotificationPlatform extends PlatformInterface {
   Future<void> stopAudio() {
     throw UnimplementedError('stopAudio() has not been implemented.');
   }
+
+  Future<String?> getPackageName() {
+    throw UnimplementedError('getPackageName() has not been implemented.');
+  }
+
+  void setOnNotificationTapped(Function(DateTime timestamp) callback) {
+    throw UnimplementedError(
+        'setOnNotificationTapped() has not been implemented.');
+  }
 }

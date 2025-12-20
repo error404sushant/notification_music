@@ -10,6 +10,20 @@ class MethodChannelGenericAudioNotification
   @visibleForTesting
   final methodChannel = const MethodChannel('generic_audio_notification');
 
+  Function(DateTime timestamp)? _onNotificationTapped;
+
+  MethodChannelGenericAudioNotification() {
+    methodChannel.setMethodCallHandler(_handleMethodCall);
+  }
+
+  Future<dynamic> _handleMethodCall(MethodCall call) async {
+    if (call.method == 'onNotificationTapped') {
+      final timestamp = call.arguments['timestamp'] as int;
+      final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      _onNotificationTapped?.call(dateTime);
+    }
+  }
+
   @override
   Future<String?> getPlatformVersion() async {
     final version =
@@ -37,5 +51,17 @@ class MethodChannelGenericAudioNotification
   @override
   Future<void> stopAudio() async {
     await methodChannel.invokeMethod('stopAudio');
+  }
+
+  @override
+  Future<String?> getPackageName() async {
+    final packageName =
+        await methodChannel.invokeMethod<String>('getPackageName');
+    return packageName;
+  }
+
+  @override
+  void setOnNotificationTapped(Function(DateTime timestamp) callback) {
+    _onNotificationTapped = callback;
   }
 }

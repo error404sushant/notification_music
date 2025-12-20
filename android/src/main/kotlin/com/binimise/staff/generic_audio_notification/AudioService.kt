@@ -16,17 +16,21 @@ class AudioService : Service() {
 
     private var mediaPlayer: MediaPlayer? = null
     private var isServicePlaying = false
+    private var notificationTimestamp: Long = 0
 
     companion object {
         const val ACTION_START = "START_AUDIO"
         const val ACTION_STOP = "STOP_AUDIO"
+        const val ACTION_NOTIFICATION_TAPPED = "NOTIFICATION_TAPPED"
         const val EXTRA_URL = "EXTRA_URL"
         const val EXTRA_TITLE = "EXTRA_TITLE"
         const val EXTRA_BODY = "EXTRA_BODY"
         const val EXTRA_ICON = "EXTRA_ICON" // Resource name
         const val EXTRA_LOOP = "EXTRA_LOOP" // Loop audio or play once
+        const val EXTRA_TIMESTAMP = "EXTRA_TIMESTAMP" // Notification timestamp
         const val CHANNEL_ID = "generic_audio_alert_channel"
         const val NOTIFICATION_ID = 888
+        const val BROADCAST_NOTIFICATION_TAPPED = "com.binimise.staff.generic_audio_notification.NOTIFICATION_TAPPED"
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -44,12 +48,26 @@ class AudioService : Service() {
                 val icon = intent.getStringExtra(EXTRA_ICON)
                 val loop = intent.getBooleanExtra(EXTRA_LOOP, true)
                 
+                // Store the timestamp when notification is created
+                notificationTimestamp = System.currentTimeMillis()
+                
                 startForegroundService(title, body, icon)
                 if (url != null) {
                     playAudio(url, loop)
                 }
             }
             ACTION_STOP -> {
+                stopAudio()
+                stopForeground(true)
+                stopSelf()
+            }
+            ACTION_NOTIFICATION_TAPPED -> {
+                // Broadcast the tap event with timestamp to Flutter
+                val broadcastIntent = Intent(BROADCAST_NOTIFICATION_TAPPED)
+                broadcastIntent.putExtra(EXTRA_TIMESTAMP, notificationTimestamp)
+                sendBroadcast(broadcastIntent)
+                
+                // Stop audio and service
                 stopAudio()
                 stopForeground(true)
                 stopSelf()
@@ -75,11 +93,15 @@ class AudioService : Service() {
             }
         }
         
-        // Use the application's launch intent to open the app on tap
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        val pendingIntent = if (launchIntent != null) {
-             PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE)
-        } else null
+        // Create intent for notification tap - this will stop audio and send timestamp
+        val tapIntent = Intent(this, AudioService::class.java)
+        tapIntent.action = ACTION_NOTIFICATION_TAPPED
+        val pendingIntent = PendingIntent.getService(
+            this, 
+            0, 
+            tapIntent, 
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)

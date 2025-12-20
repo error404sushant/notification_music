@@ -103,6 +103,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       FlutterLocalNotificationsPlugin();
   String? _fcmToken;
   String _statusMessage = 'Fetching FCM Token...';
+  DateTime? _lastNotificationTapTime;
 
   @override
   void initState() {
@@ -114,6 +115,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _setupForegroundMessageListener();
     // Stop audio on startup (in case app was launched from notification)
     _genericAudioNotificationPlugin.stopAudio();
+    // Register notification tap callback
+    _setupNotificationTapCallback();
   }
 
   // ==========================================================================
@@ -250,6 +253,30 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
+  // ==========================================================================
+  // NOTIFICATION TAP CALLBACK
+  // ==========================================================================
+  // This callback is invoked when the user taps the notification.
+  // The audio will automatically stop and we receive the notification timestamp.
+  // ==========================================================================
+  void _setupNotificationTapCallback() {
+    _genericAudioNotificationPlugin.setOnNotificationTapped((timestamp) {
+      setState(() {
+        _lastNotificationTapTime = timestamp;
+      });
+      print(
+          '\n╔════════════════════════════════════════════════════════════════╗');
+      print(
+          '║              NOTIFICATION TAPPED CALLBACK                      ║');
+      print(
+          '╚════════════════════════════════════════════════════════════════╝');
+      print('📅 Notification created at: $timestamp');
+      print('🛑 Audio stopped automatically');
+      print(
+          '═══════════════════════════════════════════════════════════════════\n');
+    });
+  }
+
   Future<void> _getToken() async {
     try {
       // Request notification permission
@@ -359,6 +386,36 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     padding: const EdgeInsets.all(16.0),
                     child: Text(_statusMessage, textAlign: TextAlign.center),
                   ),
+                if (_lastNotificationTapTime != null)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Card(
+                      color: Colors.green.shade50,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.touch_app,
+                                size: 32, color: Colors.green),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Notification Tapped!',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Created at:\n${_lastNotificationTapTime!.toLocal()}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 20),
                 const Text('Waiting for FCM messages...'),
                 const SizedBox(height: 20),
@@ -380,6 +437,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     _genericAudioNotificationPlugin.stopAudio();
                   },
                   child: const Text('Stop Audio'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _lastNotificationTapTime = null;
+                    });
+                  },
+                  child: const Text('Clear Tap Info'),
                 ),
               ],
             ),
